@@ -1,40 +1,108 @@
-const chatBox = document.getElementById("chat");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  addDoc,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔹 Firebase Config */
+const firebaseConfig = {
+  apiKey: "AIzaSyCXxwXHnQop2RuEs-7W1DCQ8-35iGClWik",
+  authDomain: "mira-chatbot-9e51a.firebaseapp.com",
+  projectId: "mira-chatbot-9e51a",
+  storageBucket: "mira-chatbot-9e51a.appspot.com",
+  messagingSenderId: "856415616380",
+  appId: "1:856415616380:web:320ac30e32f711eeb8b8f9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* 🔹 UI Elements */
+const chatBox = document.getElementById("chatBox");
 const input = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 
-// In-memory message storage (client-side only)
-let messages = [];
-
-// Random fallback replies if no match
+/* 🔹 Default Replies */
 const fallbackReplies = [
-  "Hi! 😄 How can I help you?",
-  "That's interesting! Tell me more.",
-  "Oh wow! Can you explain a bit?",
-  "I see! How does that make you feel?",
-  "Cool! What happened next?"
+  "Hmm 😊 tell me more",
+  "I am listening 👂",
+  "That sounds interesting",
+  "Oh really?",
+  "Okay 😄"
 ];
 
-// Display message in chat UI
-function displayMessage(sender, text) {
-  const msg = document.createElement("div");
-  msg.classList.add("message", sender);
-  if (sender === "bot") {
-    const avatar = document.createElement("img");
-    avatar.src = "file_000000000e9071fbb771d0d4ff3686da.png";
-    msg.appendChild(avatar);
-  }
-  const span = document.createElement("span");
-  span.textContent = text;
-  msg.appendChild(span);
-  chatBox.appendChild(msg);
+/* 🔹 Helpers */
+function addMessage(sender, text) {
+  const div = document.createElement("div");
+  div.className = `message ${sender}`;
+  div.textContent = text;
+  chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Simple similarity function
-function similarity(str1, str2) {
-  str1 = str1.toLowerCase();
-  str2 = str2.toLowerCase();
-  const words1 = str1.split(" ");
+function similarity(a, b) {
+  a = a.toLowerCase().split(" ");
+  b = b.toLowerCase().split(" ");
+  let match = 0;
+  a.forEach(w => { if (b.includes(w)) match++; });
+  return match / Math.max(a.length, b.length);
+}
+
+/* 🔹 Firestore Learn */
+async function getLearnedReply(userText) {
+  const snap = await getDocs(collection(db, "chats"));
+  let best = null, score = 0;
+
+  snap.forEach(doc => {
+    const d = doc.data();
+    const s = similarity(userText, d.userText);
+    if (s > score) {
+      score = s;
+      best = d.botReply;
+    }
+  });
+
+  return score > 0.4 ? best : null;
+}
+
+async function saveChat(user, bot) {
+  await addDoc(collection(db, "chats"), {
+    userText: user,
+    botReply: bot,
+    time: Date.now()
+  });
+}
+
+/* 🔹 Chat Flow */
+async function handleChat(text) {
+  addMessage("user", text);
+  input.value = "";
+
+  addMessage("bot", "typing...");
+  const typingEl = chatBox.lastChild;
+
+  let reply = await getLearnedReply(text);
+  if (!reply) {
+    reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+  }
+
+  setTimeout(() => {
+    typingEl.remove();
+    addMessage("bot", reply);
+    saveChat(text, reply);
+  }, 900 + Math.random() * 1200);
+}
+
+/* 🔹 Events */
+sendBtn.onclick = () => {
+  if (input.value.trim()) handleChat(input.value.trim());
+};
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendBtn.click();
+});  const words1 = str1.split(" ");
   const words2 = str2.split(" ");
   let matches = 0;
   words1.forEach((w) => {
