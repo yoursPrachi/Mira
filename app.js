@@ -20,7 +20,7 @@ function displayMessage(sender, text) {
   msg.classList.add("message", sender);
   if (sender === "bot") {
     const avatar = document.createElement("img");
-    avatar.src = "assets/mira-avatar.png";
+    avatar.src = "file_000000000e9071fbb771d0d4ff3686da.png";
     msg.appendChild(avatar);
   }
   const span = document.createElement("span");
