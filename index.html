@@ -1,19 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mira Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./style.css">
+<meta charset="UTF-8">
+<title>Mira Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
+<div class="chat-container">
 
-<div id="chatBox"></div>
+  <div class="chat-header">
+    <img id="botAvatar" class="avatar"
+      src="https://firebasestorage.googleapis.com/v0/b/mira-chatbot-9e51a.appspot.com/o/avatars%2Fmira.webp?alt=media">
+    <div>
+      <h3>Mira</h3>
+      <span id="status" class="status online">online</span>
+    </div>
+  </div>
 
-<input id="userInput" placeholder="Type..." />
-<button id="sendBtn">Send</button>
+  <div id="chatBox" class="chat-box"></div>
 
-<!-- IMPORTANT -->
+  <div class="chat-input">
+    <textarea id="userInput" placeholder="Type a message…" rows="1"></textarea>
+    <button id="sendBtn">➤</button>
+  </div>
+
+</div>
+
 <script type="module" src="./app.js"></script>
 </body>
 </html>
